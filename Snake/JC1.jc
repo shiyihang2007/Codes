@@ -1,0 +1,228 @@
+/*#include <conio.h>*/
+/*#include <stdio.h>*/
+/*#include <stdlib.h>*/
+/*#include <time.h>*/
+#include "ASEIO.h"
+#define MAXN 7
+char px[MAXN + 5][MAXN * 2 + 1] = {
+    {}, {}, {}, {}, {}, {}, {}, {' ', 'S', 'c', 'o', 'r', 'e', ':',  '%', 'd', ' ', '%', 'd', ' ', '%', 'd'}};
+struct Body
+{
+    int timer;
+    int x, y;
+    char BodyCh[2];
+};
+struct Body NewBody(int n, int x, int y, char ch[2])
+{
+    struct Body a;
+    a.timer = n;
+    a.x = x, a.y = y;
+    a.BodyCh[0] = ch[0];
+    a.BodyCh[1] = ch[1];
+    return a;
+}
+struct Snake
+{
+    int way;
+    /* list: *  map:   *
+     * 1.N ^ *   1^    *
+     * 2.E < * 4<   >2 *
+     * 3.S v *   3v    *
+     * 4.W > *         */
+    int lenth;
+    int x, y;
+    const char *HeadCh;
+    struct Body snakebody[65];
+} snake;
+inline struct Snake NewSnake(int n, int x, int y, const char *ch)
+{
+    struct Snake a;
+    a.lenth = n;
+    a.x = x, a.y = y;
+    a.HeadCh = ch;
+    return a;
+}
+char DrawBody(int n)
+{
+    switch (n)
+    {
+    case 1:
+        return '|';
+        break;
+    case 2:
+        return '>';
+        break;
+    case 3:
+        return '!';
+        break;
+    case 4:
+        return '<';
+        break;
+    default:
+        break;
+    }
+}
+int appleX = 4, appleY = 3, appleAddScore = 1;
+long long i, j, btl, btr;
+int main()
+{
+    srand(seconds());
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>      \n\n\n");
+    wait(0.1250);
+    BEEP(523.2, 0.250000);
+    /*while (!Get_Button())
+        ;*/
+    for (i = 0; i < MAXN; ++i)
+    {
+        for (j = 0; j <= MAXN; ++j)
+        {
+            px[i][j * 2] = ' ', px[i][j * 2 + 1] = ' ';
+            if (j == MAXN)
+                px[i][j * 2] = '|', px[i][j * 2 + 1] = '#';
+        }
+        px[i][MAXN * 2] = '\n';
+    }
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>             \n\n\n");
+    wait(0);
+    BEEP(587.3, 0.250000);
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>>            \n\n\n");
+    wait(0);
+    BEEP(659.2, 0.250000);
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>>>           \n\n\n");
+    wait(0);
+    BEEP(698.4, 0.250000);
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>>>>          \n\n\n");
+    wait(0.0);
+    BEEP(783.9, 0.250000);
+    snake.HeadCh = "::";
+    snake.lenth = 5;
+    snake.way = 1;
+    snake.x = 6;
+    snake.y = 3;
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>>>>>        \n\n\n");
+    wait(0.0);
+    BEEP(880.0, 0.250000);
+    for (i = 1; i <= 81; ++i)
+    {
+        snake.snakebody[i] = NewBody(i, 7, 8, "::");
+    }
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>>>>>>>      \n\n\n");
+    wait(0.0);
+    BEEP(987.7, 0.250000);
+    printf("############\n#Snake Game#\n############\n#Type Enter#\n# To Start #\n>>>>>>>>>>>>  \n\n\n");
+    wait(0.0);
+    BEEP(1319.0, 0.250000);
+    /*getchar(); //In windows,this can puash the program ( if you not type chars ) --but JC need the different.*/
+    while (!Get_Button())
+        ; /*In JC,Get_Button can't stop the program,so we use the while to make it wait.*/
+    while (1)
+    {
+        /*Codes Begin*/
+        for (i = 1; i <= snake.lenth; ++i)
+        {
+            snake.snakebody[i].timer--;
+            if (snake.snakebody[i].timer > 0)
+            {
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2] = snake.snakebody[i].BodyCh[0];
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2 + 1] = snake.snakebody[i].BodyCh[1];
+            }
+            else
+            {
+                snake.snakebody[i].BodyCh[0] = DrawBody(snake.way);
+                snake.snakebody[i].BodyCh[1] = DrawBody(snake.way);
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2] = ' ';
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2 + 1] = ' ';
+                snake.snakebody[i].x = snake.x, snake.snakebody[i].y = snake.y;
+                snake.snakebody[i].timer = snake.lenth;
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2] = snake.snakebody[i].BodyCh[0];
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2 + 1] = snake.snakebody[i].BodyCh[1];
+            }
+        }
+        btl = Get_BtnLeft();
+        if (btl == 1)
+        {
+            BEEP(1760.0, 0.250000);
+            snake.way--;
+            if (snake.way < 1)
+                snake.way = 4;
+        }
+        btr = Get_BtnRight();
+        if (btr == 1)
+        {
+            BEEP(1760.0, 0.250000);
+            snake.way++;
+            if (snake.way > 4)
+                snake.way = 1;
+        }
+        switch (snake.way)
+        {
+        case 1:
+            if (snake.x > 0)
+                snake.x--;
+            else
+            {
+                printf("\n\n\n## You Lost! ##\n###Game Over###\n\n\n\n");
+                return 0;
+            }
+            break;
+        case 2:
+            if (snake.y < 6)
+                snake.y++;
+            else
+            {
+                printf("\n\n\n## You Lost! ##\n###Game Over###\n\n\n\n");
+                return 0;
+            }
+            break;
+        case 3:
+            if (snake.x < 6)
+                snake.x++;
+            else
+            {
+                printf("\n\n\n## You Lost! ##\n###Game Over###\n\n\n\n");
+                return 0;
+            }
+            break;
+        case 4:
+            if (snake.y > 0)
+                snake.y--;
+            else
+            {
+                printf("\n\n\n## You Lost! ##\n###Game Over###\n\n\n\n");
+                return 0;
+            }
+            break;
+        default:
+            snake.way = 1;
+            if (snake.x > 0)
+                snake.x--;
+            else
+            {
+                printf("\n\n\n## You Lost! ##\n###Game Over###\n\n\n\n");
+                return 0;
+            }
+            break;
+        }
+        px[appleX /*4*/][appleY /* + appleY */ /*8*/] = '(';
+        px[appleX /*4*/][appleY /* + appleY */ + 1 /*9*/] = ')';
+        if (snake.x == appleX && (snake.y * 2 == appleY || snake.y * 2 == appleY + 1 || snake.y * 2 == appleY - 1))
+        {
+            BEEP(1760.0, 0.250000);
+            BEEP(1780.0, 0.250000);
+            px[/*appleX*/ 4][appleY /* + appleY */ /*8*/] = ' ';
+            px[/*appleX*/ 4][appleY /* + appleY */ + 1 /*9*/] = ' ';
+            snake.lenth += appleAddScore, appleX = rand() % 4 + 1, appleY = rand() % 4 + 1;
+            px[/*appleX*/ 4][appleY /* + appleY */ /*8*/] = '(';
+            px[/*appleX*/ 4][appleY /* + appleY */ + 1 /*9*/] = ')';
+        }
+        px[snake.x][snake.y * 2] = snake.HeadCh[0];
+        px[snake.x][snake.y * 2 + 1] = snake.HeadCh[1];
+        /*Codes End*/
+        Printf((char *)px, snake.lenth, appleX, appleY);
+        wait(1.000);
+        /*system("cls"); //In windows,this can clean the window --but JC not need.*/
+    }
+}
+
+
+//2013DUODUOSnakeA0905

@@ -1,0 +1,318 @@
+/*#include <conio.h>*/
+/*#include <stdio.h>*/
+/*#include <stdlib.h>*/
+/*#include <time.h>*/
+#include "ASEIO.h"
+// 宏:   AI_BLACK
+// 值:   1500
+// 作用: 光电阈值
+#define AI_BLACK 1500
+//
+// 结构体: Body
+//
+// 作用: 存放关于蛇身的参数
+//
+// 元素:
+//      int timer; //剩余存活时间
+//      int x, y;  //身体坐标
+//
+struct Body
+{
+    int timer; //剩余存活时间
+    int x, y;  //身体坐标
+};
+//
+// 函数: NewBody(int n,int x,int y)
+//
+// 目标: 创建一个新的Body结构体，并初始化
+//
+// 参数: n: 存活时间 ; x/y: 坐标
+//
+struct Body NewBody(int n, int x, int y)
+{
+    struct Body a;
+    a.timer = n;
+    a.x = x, a.y = y;
+    return a;
+}
+//
+// 结构体: Snake
+//
+// 作用: 存放关于蛇的参数
+//
+// 元素:
+//      int way;                    //蛇头方向
+//      int lenth;                  //蛇长度
+//      int x, y;                   //蛇头坐标
+//      struct Body snakebody[256]; //蛇身
+//
+struct Snake
+{
+    /* 含义:
+     * 列表:   map:   
+     * 1.N ^    1^    
+     * 2.E <  4<   >2 
+     * 3.S v    3v    
+     * 4.W >          
+     */
+    int way;
+    /* list: *  map:   *
+     * 0.N ^ *   0^    *
+     * 1.E < * 3<   >1 *
+     * 2.S v *   2v    *
+     * 3.W > *         */
+    int lenth;
+    int x, y;
+    struct Body snakebody[256];
+} snake;
+//
+// 函数: lost()
+//
+// 目标: 显示失败界面
+//
+// 参数: void
+//
+void lost(void)
+{
+    printf("");
+    BEEP(293.6, 0.250);
+    printf("\n   ###############\n   ## YOU LOST! ##\n   ## GAME OVER ##\n   ###############\n");
+    BEEP(261.6, 1.000);
+}
+// 变量: appleX/appleY/appleAddScore
+// 作用: 存储关于apple的信息
+int appleX = 4, appleY = 3, appleAddScore = 1;
+// 变量: 循环变量 i/j/k/l
+// 作用: 临时变量
+long long i, j, k, l;
+// 变量: 按钮变量 bt_top/bt_button/bt_left/bt_right
+// 作用: 存储上/下/左/右按钮是否按下
+int bt_top, bt_left, bt_right, bt_button;
+int main()
+{
+    /* 开始界面 */
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n        \n\n");
+    resettime();
+    /* 暂停，使随机数种子真正"随机" */
+    while (!Get_Button())
+        ; /*In JC,Get_Button can't stop the program,so we use the while to make it wait.*/
+    /* 加载界面 开始 */
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >      \n\n");
+    wait(0.1250);
+    BEEP(523.2, 0.250000);
+    srand((unsigned)seconds() * 1000); // 初始化随机数函数，使用当前时间作为种子，单位ms
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>             \n\n");
+    wait(0);
+    BEEP(587.3, 0.250000);
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>>>           \n\n");
+    wait(0);
+    BEEP(659.2, 0.250000);
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>>>>          \n\n");
+    wait(0);
+    BEEP(698.4, 0.250000);
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>>>>>>         \n\n");
+    wait(0.0);
+    BEEP(783.9, 0.250000);
+    /*创建蛇*/
+    snake.lenth = 5;
+    snake.way = 1;
+    snake.x = 6;
+    snake.y = 3;
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>>>>>>>>       \n\n");
+    wait(0.0);
+    BEEP(880.0, 0.250000);
+    for (i = 1; i <= 255; ++i)
+    {
+        snake.snakebody[i] = NewBody(i, i % 8 + 1, 15); // 创建蛇身（这是个冗余的函数，会造成一定的内存浪费）
+    }
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>>>>>>>>>>     \n\n");
+    wait(0.0);
+    BEEP(987.7, 0.250000);
+    printf("\n   ###############\n   ##Snaker Game##\n   ###############\n   ##Type  Enter##\n   ## To  Start ##\n   >>>>>>>>>>>>>>>  \n\n");
+    wait(0.0);
+    BEEP(1319.0, 0.250000);
+    /* 加载界面 结束 */
+    /*getchar(); //In windows,this can puash the program ( if you not type chars ) --but JC need the different.*/
+    /*
+    while (!Get_Button())
+        ;
+    */
+    /* 清屏 */
+    printf("                              \n                              \n                              \n                              \n                              \n                              \n                              \n");
+    /* 绘制边框 */
+    for (j = 0 * 8; j < 8 * 8; ++j)
+        for (i = 0 * 8 + (j & 1); i < 1 * 8; ++i, ++i)
+            LCD_DrawPoint(i, j, 1); //Left-border
+    for (j = 0 * 8; j < 8 * 8; ++j)
+        for (i = 14 * 8 + (j & 1); i < 15 * 8; ++i, ++i)
+            LCD_DrawPoint(i, j, 1); //Right-border
+    for (i = 0 * 8; i < 15 * 8; ++i)
+        for (j = 0 * 8 + (i & 1); j < 1 * 8; ++j, ++j)
+            LCD_DrawPoint(i, j, 1); //Top-border
+    for (i = 0 * 8; i < 15 * 8; ++i)
+        for (j = 7 * 8 + (i & 1); j < 8 * 8; ++j, ++j)
+            LCD_DrawPoint(i, j, 1); //Button-border
+    /* 主程序循环 */
+    while (1)
+    {
+        /*Codes Begin*/
+        for (i = 1; i <= snake.lenth; ++i)
+        {
+            snake.snakebody[i].timer--;       // 将每个蛇身的存活时间都缩短1Tick
+            if (snake.snakebody[i].timer > 0) // 如果这个蛇身还可以继续存活
+            {
+                /*
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2] = snake.snakebody[i].BodyCh[0];
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2 + 1] = snake.snakebody[i].BodyCh[1];
+                */
+                for (j = (snake.snakebody[i].y) * 8; j <= (snake.snakebody[i].y) * 8 + 7; ++j)
+                    for (k = (snake.snakebody[i].x) * 8; k <= (snake.snakebody[i].x) * 8 + 7; ++k)
+                        LCD_DrawPoint(j, k, 1);                                         // 绘制蛇身
+                if (snake.x == snake.snakebody[i].x && snake.y == snake.snakebody[i].y) // 如果蛇头撞上了蛇身
+                {
+                    lost();
+                    return 0;
+                }
+            }
+            else // 如果这个蛇身的当前位置的存活时间已经归零
+            {
+                /*
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2] = ' ';
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2 + 1] = ' ';
+                */
+                for (j = (snake.snakebody[i].y) * 8; j <= (snake.snakebody[i].y) * 8 + 7; ++j)
+                    for (k = (snake.snakebody[i].x) * 8; k <= (snake.snakebody[i].x) * 8 + 7; ++k)
+                        LCD_DrawPoint(j, k, 0); // 将当前位置的蛇身清除
+                snake.snakebody[i].x = snake.x, snake.snakebody[i].y = snake.y;
+                snake.snakebody[i].timer = snake.lenth; // 重新设置蛇身位置
+                /*
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2] = snake.snakebody[i].BodyCh[0];
+                px[snake.snakebody[i].x][snake.snakebody[i].y * 2 + 1] = snake.snakebody[i].BodyCh[1];
+                */
+                for (j = (snake.snakebody[i].y) * 8; j <= (snake.snakebody[i].y) * 8 + 7; ++j)
+                    for (k = (snake.snakebody[i].x) * 8; k <= (snake.snakebody[i].x) * 8 + 7; ++k)
+                        LCD_DrawPoint(j, k, 1); // 在新位置绘制
+            }
+        }
+        /* 控制蛇的方向 */
+        if (bt_top == 1)
+        {
+            BEEP(1760.0, 0.250000);
+            if (snake.way == 2 || snake.way == 4)
+                snake.way = 1;
+            bt_top = 0;
+        }
+        if (bt_button == 1)
+        {
+            BEEP(1760.0, 0.250000);
+            if (snake.way == 2 || snake.way == 4)
+                snake.way = 3;
+            bt_button = 0;
+        }
+        if (bt_left == 1)
+        {
+            BEEP(1760.0, 0.250000);
+            if (snake.way == 1 || snake.way == 3)
+                snake.way = 4;
+            bt_left = 0;
+        }
+        if (bt_right == 1)
+        {
+            BEEP(1760.0, 0.250000);
+            if (snake.way == 1 || snake.way == 3)
+                snake.way = 2;
+            bt_right = 0;
+        }
+        //px[snake.x][snake.y * 2] = ' ';
+        //px[snake.x][snake.y * 2 + 1] = ' ';
+        /* 前进 */
+        switch (snake.way)
+        {
+        case 1:
+            if (snake.x > 1)
+                snake.x--;
+            else
+            {
+                lost();
+                return 0;
+            }
+            break;
+        case 2:
+            if (snake.y < 14)
+                snake.y++;
+            else
+            {
+                lost();
+                return 0;
+            }
+            break;
+        case 3:
+            if (snake.x < 6)
+                snake.x++;
+            else
+            {
+                lost();
+                return 0;
+            }
+            break;
+        case 4:
+            if (snake.y > 1)
+                snake.y--;
+            else
+            {
+                lost();
+                return 0;
+            }
+            break;
+        default:
+            snake.way = 1;
+            if (snake.x > 1)
+                snake.x--;
+            else
+            {
+                lost();
+                return 0;
+            }
+            break;
+        }
+        /* 绘制苹果 */
+        //px[appleX /*4*/][appleY /* + appleY */ /*8*/] = '(';
+        //px[appleX /*4*/][appleY /* + appleY */ + 1 /*9*/] = ')';
+        LCD_DrawCircle1((appleY)*8 + 4, (appleX)*8 + 4, 4, 2);
+        /* 如果蛇吃到苹果 */
+        if (snake.x == appleX && snake.y == appleY)
+        {
+            BEEP(587.3, 0.250000);
+            BEEP(783.9, 0.50000); // 奖励声
+            //px[/*appleX*/ 4][appleY /* + appleY */ /*8*/] = ' ';
+            //px[/*appleX*/ 4][appleY /* + appleY */ + 1 /*9*/] = ' ';
+            snake.lenth += appleAddScore;                          // 增加蛇的长度
+            appleX = rand() % 4 + 1, appleY = rand() % 4 + 1;      // 更改苹果位置
+            LCD_DrawCircle1((appleY)*8 + 4, (appleX)*8 + 4, 4, 0); // 重新绘制苹果
+            //px[/*appleX*/ 4][appleY /* + appleY */ /*8*/] = '(';
+            //px[/*appleX*/ 4][appleY /* + appleY */ + 1 /*9*/] = ')';
+        }
+        //px[snake.x][snake.y * 2] = snake.HeadCh[0];
+        //px[snake.x][snake.y * 2 + 1] = snake.HeadCh[1];
+        LCD_DrawCircle1((snake.y) * 8 + 4, (snake.x) * 8 + 4, 4, 1); // 绘制蛇头
+        /*Codes End*/
+        //Printf((char *)px, snake.lenth, appleX, appleY);
+        /* 等待时间（会越来越短） */
+        for (i = 1; i <= (20000 - (int)seconds() / 10); ++i)
+        {
+            wait(0.00005);
+            /* 使用按钮传感器 */
+            bt_top = (DI(0)) ? 1 : bt_top,
+            bt_button = (DI(2)) ? 1 : bt_button,
+            bt_left = (DI(1)) ? 1 : bt_left,
+            bt_left = (DI(3)) ? 1 : bt_right;
+            /* 使用灰度传感器 */
+            //bt_top = (AI(0)>AI_BLACK) ? 1 : bt_top,
+            //bt_button = (AI(2)>AI_BLACK) ? 1 : bt_button,
+            //bt_left = (AI(1)>AI_BLACK) ? 1 : bt_left,
+            //bt_left = (AI(3)>AI_BLACK) ? 1 : bt_right;
+        }
+        /*system("cls"); //In windows,this can clean the window --but JC not need.*/
+    }
+}
+//2013DUODUOSnake3A0905
